@@ -66,7 +66,7 @@
             font-size: 1.2em;
         }
 
-        .login-container {
+        .auth-container {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -74,7 +74,7 @@
             padding: 40px;
         }
 
-        .login-form {
+        .auth-form {
             background: white;
             padding: 40px;
             border-radius: 15px;
@@ -84,10 +84,34 @@
             text-align: center;
         }
 
-        .login-form h2 {
+        .auth-form h2 {
             color: #333;
             margin-bottom: 30px;
             font-size: 2em;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-radius: 25px;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .auth-tab.active {
+            background: #4CAF50;
+            color: white;
         }
 
         .main-content {
@@ -149,6 +173,18 @@
             min-height: 80px;
         }
 
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #28a745;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
         .btn {
             background: linear-gradient(45deg, #4CAF50, #45a049);
             color: white;
@@ -167,6 +203,12 @@
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-logout {
@@ -194,7 +236,8 @@
             color: #555;
         }
 
-        .filters select {
+        .filters select,
+        .filters input {
             padding: 8px 15px;
             border: 2px solid #ddd;
             border-radius: 20px;
@@ -357,6 +400,15 @@
             display: none;
         }
 
+        .password-strength {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .strength-weak { color: #dc3545; }
+        .strength-medium { color: #ffc107; }
+        .strength-strong { color: #28a745; }
+
         @media (max-width: 768px) {
             .container {
                 margin: 10px;
@@ -398,30 +450,71 @@
     </style>
 </head>
 <body>
-    <!-- หน้า Login -->
-    <div id="loginPage" class="container">
+    <!-- หน้า Authentication -->
+    <div id="authPage" class="container">
         <div class="header">
             <div class="header-left">
                 <h1>🏢 ระบบติดตามลูกค้า</h1>
-                <p>เข้าสู่ระบบเพื่อจัดการข้อมูลลูกค้า</p>
+                <p>ระบบจัดการข้อมูลลูกค้าและติดตามสถานะงาน</p>
             </div>
         </div>
-        <div class="login-container">
-            <form class="login-form" id="loginForm">
-                <h2>🔐 เข้าสู่ระบบ</h2>
-                <div class="form-group">
-                    <label for="username">ชื่อผู้ใช้</label>
-                    <input type="text" id="username" required placeholder="กรอกชื่อผู้ใช้">
+        <div class="auth-container">
+            <div class="auth-form">
+                <div class="auth-tabs">
+                    <button class="auth-tab active" onclick="showLoginTab()">เข้าสู่ระบบ</button>
+                    <button class="auth-tab" onclick="showRegisterTab()">สมัครสมาชิก</button>
                 </div>
-                <div class="form-group" style="margin-bottom: 30px;">
-                    <label for="displayName">ชื่อที่แสดง</label>
-                    <input type="text" id="displayName" required placeholder="ชื่อที่จะแสดงในระบบ">
+
+                <!-- Login Form -->
+                <div id="loginTab">
+                    <h2>🔐 เข้าสู่ระบบ</h2>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="loginUsername">ชื่อผู้ใช้</label>
+                            <input type="text" id="loginUsername" required placeholder="กรอกชื่อผู้ใช้">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 30px;">
+                            <label for="loginPassword">รหัสผ่าน</label>
+                            <input type="password" id="loginPassword" required placeholder="กรอกรหัสผ่าน">
+                            <div id="loginError" class="error-message"></div>
+                        </div>
+                        <button type="submit" class="btn">เข้าสู่ระบบ</button>
+                    </form>
                 </div>
-                <button type="submit" class="btn">เข้าสู่ระบบ</button>
-                <p style="margin-top: 20px; color: #666; font-size: 0.9em;">
-                    💡 ใส่ชื่อผู้ใช้และชื่อที่แสดงเพื่อเข้าใช้งาน
-                </p>
-            </form>
+
+                <!-- Register Form -->
+                <div id="registerTab" class="hidden">
+                    <h2>👤 สมัครสมาชิก</h2>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label for="regUsername">ชื่อผู้ใช้ *</label>
+                            <input type="text" id="regUsername" required placeholder="ชื่อผู้ใช้ (ภาษาอังกฤษ)">
+                            <div id="usernameError" class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="regDisplayName">ชื่อที่แสดง *</label>
+                            <input type="text" id="regDisplayName" required placeholder="ชื่อที่จะแสดงในระบบ">
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail">อีเมล *</label>
+                            <input type="email" id="regEmail" required placeholder="example@email.com">
+                            <div id="emailError" class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">รหัสผ่าน *</label>
+                            <input type="password" id="regPassword" required placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)">
+                            <div id="passwordStrength" class="password-strength"></div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 30px;">
+                            <label for="regConfirmPassword">ยืนยันรหัสผ่าน *</label>
+                            <input type="password" id="regConfirmPassword" required placeholder="ยืนยันรหัสผ่าน">
+                            <div id="confirmPasswordError" class="error-message"></div>
+                        </div>
+                        <button type="submit" class="btn" id="registerBtn">สมัครสมาชิก</button>
+                        <div id="registerSuccess" class="success-message" style="margin-top: 15px;"></div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -436,7 +529,7 @@
                 <div class="user-avatar" id="userAvatar"></div>
                 <div>
                     <div style="font-weight: 600;" id="userDisplayName"></div>
-                    <div style="font-size: 0.9em; opacity: 0.8;">ผู้ใช้งาน</div>
+                    <div style="font-size: 0.9em; opacity: 0.8;" id="userEmail"></div>
                 </div>
                 <button class="btn btn-logout" onclick="logout()">ออกจากระบบ</button>
             </div>
@@ -477,7 +570,7 @@
                             <input type="tel" id="customerPhone">
                         </div>
                         <div class="form-group">
-                            <label for="customerEmail">User</label>
+                            <label for="customerEmail">อีเมล</label>
                             <input type="email" id="customerEmail">
                         </div>
                         <div class="form-group">
@@ -495,14 +588,16 @@
 
             <!-- ฟิลเตอร์ -->
             <div class="filters">
-                <label>กรองตามสถานะ:</label>
+                <label>ค้นหา:</label>
+                <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, เบอร์โทร, หรือเรื่องที่ติดต่อ">
+                <label>สถานะ:</label>
                 <select id="statusFilter">
                     <option value="all">ทั้งหมด</option>
                     <option value="waiting">รอติดตาม</option>
                     <option value="followup">ติดตามซ้ำ</option>
                     <option value="completed">เสร็จแล้ว</option>
                 </select>
-                <label>กรองตามผู้สร้าง:</label>
+                <label>ผู้สร้าง:</label>
                 <select id="userFilter">
                     <option value="all">ทุกคน</option>
                 </select>
@@ -522,280 +617,239 @@
     <script>
         // ตัวแปรระบบ
         let customers = [];
+        let users = [];
         let currentUser = null;
         let editingId = null;
 
         // เมื่อโหลดหน้า
         document.addEventListener('DOMContentLoaded', function() {
-            // ตรวจสอบว่ามี user login อยู่หรือไม่
+            loadData();
             checkLogin();
+            initializeEventListeners();
         });
+
+        // โหลดข้อมูลจาก LocalStorage
+        function loadData() {
+            const savedCustomers = localStorage.getItem('customers');
+            const savedUsers = localStorage.getItem('users');
+            const savedCurrentUser = localStorage.getItem('currentUser');
+            
+            if (savedCustomers) customers = JSON.parse(savedCustomers);
+            if (savedUsers) users = JSON.parse(savedUsers);
+            if (savedCurrentUser) currentUser = JSON.parse(savedCurrentUser);
+        }
+
+        // บันทึกข้อมูลใน LocalStorage
+        function saveData() {
+            localStorage.setItem('customers', JSON.stringify(customers));
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
 
         // ตรวจสอบการ login
         function checkLogin() {
-            // ในการใช้งานจริง อาจจะเก็บใน localStorage หรือ session
             if (currentUser) {
                 showMainPage();
             } else {
-                showLoginPage();
+                showAuthPage();
             }
         }
 
-        // แสดงหน้า login
-        function showLoginPage() {
-            document.getElementById('loginPage').classList.remove('hidden');
+        // แสดงหน้า Authentication
+        function showAuthPage() {
+            document.getElementById('authPage').classList.remove('hidden');
             document.getElementById('mainPage').classList.add('hidden');
         }
 
         // แสดงหน้าหลัก
         function showMainPage() {
-            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('authPage').classList.add('hidden');
             document.getElementById('mainPage').classList.remove('hidden');
             
-            // อัพเดทข้อมูล user
             updateUserDisplay();
             updateUserFilter();
             renderCustomers();
             updateStats();
         }
 
-        // Login form
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Tab switching
+        function showLoginTab() {
+            document.getElementById('loginTab').classList.remove('hidden');
+            document.getElementById('registerTab').classList.add('hidden');
+            document.querySelectorAll('.auth-tab')[0].classList.add('active');
+            document.querySelectorAll('.auth-tab')[1].classList.remove('active');
+        }
+
+        function showRegisterTab() {
+            document.getElementById('loginTab').classList.add('hidden');
+            document.getElementById('registerTab').classList.remove('hidden');
+            document.querySelectorAll('.auth-tab')[0].classList.remove('active');
+            document.querySelectorAll('.auth-tab')[1].classList.add('active');
+        }
+
+        // Initialize Event Listeners
+        function initializeEventListeners() {
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            
+            // Register form
+            document.getElementById('registerForm').addEventListener('submit', handleRegister);
+            
+            // Customer form
+            document.getElementById('customerForm').addEventListener('submit', handleCustomerSubmit);
+            
+            // Filters
+            document.getElementById('statusFilter').addEventListener('change', renderCustomers);
+            document.getElementById('userFilter').addEventListener('change', renderCustomers);
+            document.getElementById('searchInput').addEventListener('input', renderCustomers);
+            
+            // Real-time validation
+            document.getElementById('regUsername').addEventListener('input', validateUsername);
+            document.getElementById('regEmail').addEventListener('input', validateEmail);
+            document.getElementById('regPassword').addEventListener('input', checkPasswordStrength);
+            document.getElementById('regConfirmPassword').addEventListener('input', validateConfirmPassword);
+        }
+
+        // Handle Login
+        function handleLogin(e) {
             e.preventDefault();
             
-            const username = document.getElementById('username').value.trim();
-            const displayName = document.getElementById('displayName').value.trim();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
             
-            if (username && displayName) {
-                currentUser = {
-                    username: username,
-                    displayName: displayName,
-                    loginTime: new Date().toLocaleString('th-TH')
-                };
-                
-                // ล้างฟอร์ม
-                this.reset();
-                
-                // ไปหน้าหลัก
-                showMainPage();
-            }
-        });
-
-        // อัพเดทการแสดงผล user
-        function updateUserDisplay() {
-            if (currentUser) {
-                document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0).toUpperCase();
-                document.getElementById('userDisplayName').textContent = currentUser.displayName;
-            }
-        }
-
-        // อัพเดทฟิลเตอร์ผู้ใช้
-        function updateUserFilter() {
-            const userFilter = document.getElementById('userFilter');
-            const users = [...new Set(customers.map(c => c.createdBy))];
+            // Clear previous errors
+            errorDiv.textContent = '';
             
-            userFilter.innerHTML = '<option value="all">ทุกคน</option>';
-            users.forEach(user => {
-                userFilter.innerHTML += `<option value="${user}">${user}</option>`;
-            });
-        }
-
-        // ออกจากระบบ
-        function logout() {
-            if (confirm('คุณต้องการออกจากระบบหรือไม่?')) {
-                currentUser = null;
-                showLoginPage();
+            // Find user
+            const user = users.find(u => u.username === username);
+            
+            if (!user) {
+                errorDiv.textContent = 'ไม่พบชื่อผู้ใช้นี้';
+                return;
             }
+            
+            if (user.password !== password) {
+                errorDiv.textContent = 'รหัสผ่านไม่ถูกต้อง';
+                return;
+            }
+            
+            // Login successful
+            currentUser = {
+                username: user.username,
+                displayName: user.displayName,
+                email: user.email,
+                loginTime: new Date().toLocaleString('th-TH')
+            };
+            
+            saveData();
+            document.getElementById('loginForm').reset();
+            showMainPage();
         }
 
-        // ส่งฟอร์มลูกค้า
-        document.getElementById('customerForm').addEventListener('submit', function(e) {
+        // Handle Register
+        function handleRegister(e) {
             e.preventDefault();
             
-            if (!currentUser) {
-                alert('กรุณาเข้าสู่ระบบก่อน');
+            const username = document.getElementById('regUsername').value.trim();
+            const displayName = document.getElementById('regDisplayName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            // Validate all fields
+            if (!validateUsername() || !validateEmail() || !validateConfirmPassword()) {
                 return;
             }
             
-            const customerData = {
-                id: editingId || Date.now(),
-                name: document.getElementById('customerName').value,
-                phone: document.getElementById('customerPhone').value,
-                email: document.getElementById('customerEmail').value,
-                reason: document.getElementById('contactReason').value,
-                details: document.getElementById('customerDetails').value,
-                status: 'waiting',
-                createdBy: currentUser.displayName,
-                createdAt: new Date().toLocaleString('th-TH'),
-                updatedBy: currentUser.displayName,
-                updatedAt: new Date().toLocaleString('th-TH')
+            if (password.length < 6) {
+                alert('รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร');
+                return;
+            }
+            
+            // Check if user already exists
+            if (users.find(u => u.username === username)) {
+                document.getElementById('usernameError').textContent = 'ชื่อผู้ใช้นี้มีอยู่แล้ว';
+                return;
+            }
+            
+            if (users.find(u => u.email === email)) {
+                document.getElementById('emailError').textContent = 'อีเมลนี้มีอยู่แล้ว';
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                username: username,
+                displayName: displayName,
+                email: email,
+                password: password,
+                createdAt: new Date().toLocaleString('th-TH')
             };
-
-            if (editingId) {
-                // แก้ไข
-                const index = customers.findIndex(c => c.id === editingId);
-                customers[index] = {...customers[index], ...customerData, 
-                    createdBy: customers[index].createdBy, 
-                    createdAt: customers[index].createdAt
-                };
-                editingId = null;
-                document.querySelector('.btn[type="submit"]').textContent = 'เพิ่มลูกค้า';
-            } else {
-                // เพิ่มใหม่
-                customers.push(customerData);
-            }
-
-            // ล้างฟอร์ม
-            this.reset();
             
-            // อัพเดท
-            updateUserFilter();
-            renderCustomers();
-            updateStats();
-        });
-
-        // กรองข้อมูล
-        document.getElementById('statusFilter').addEventListener('change', renderCustomers);
-        document.getElementById('userFilter').addEventListener('change', renderCustomers);
-
-        // แสดงรายการลูกค้า
-        function renderCustomers() {
-            const statusFilter = document.getElementById('statusFilter').value;
-            const userFilter = document.getElementById('userFilter').value;
+            users.push(newUser);
+            saveData();
             
-            let filteredCustomers = customers;
+            // Show success message
+            document.getElementById('registerSuccess').textContent = 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ';
+            document.getElementById('registerForm').reset();
             
-            if (statusFilter !== 'all') {
-                filteredCustomers = filteredCustomers.filter(c => c.status === statusFilter);
-            }
-            
-            if (userFilter !== 'all') {
-                filteredCustomers = filteredCustomers.filter(c => c.createdBy === userFilter);
-            }
-
-            const customerList = document.getElementById('customerList');
-            
-            if (filteredCustomers.length === 0) {
-                customerList.innerHTML = `
-                    <div class="empty-state">
-                        <div style="font-size: 4em; margin-bottom: 20px; opacity: 0.3;">📋</div>
-                        <h3>ไม่พบข้อมูลลูกค้า</h3>
-                        <p>ลองเปลี่ยนเงื่อนไขการกรองหรือเพิ่มข้อมูลใหม่</p>
-                    </div>
-                `;
-                return;
-            }
-
-            customerList.innerHTML = filteredCustomers.map(customer => `
-                <div class="customer-item">
-                    <div class="customer-header">
-                        <div class="customer-name">${customer.name}</div>
-                        <div class="customer-date">${customer.createdAt}</div>
-                    </div>
-                    <div class="customer-details">
-                        <strong>เรื่องที่ติดต่อ:</strong> ${customer.reason}<br>
-                        ${customer.phone ? `<strong>เบอร์โทร:</strong> ${customer.phone}<br>` : ''}
-                        ${customer.email ? `<strong>User:</strong> ${customer.email}<br>` : ''}
-                        ${customer.details ? `<strong>รายละเอียด:</strong> ${customer.details}` : ''}
-                    </div>
-                    <div class="customer-meta">
-                        👤 <strong>สร้างโดย:</strong> ${customer.createdBy} | 
-                        📅 <strong>สร้างเมื่อ:</strong> ${customer.createdAt}
-                        ${customer.updatedBy !== customer.createdBy ? `<br>✏️ <strong>แก้ไขล่าสุดโดย:</strong> ${customer.updatedBy} (${customer.updatedAt})` : ''}
-                    </div>
-                    <div class="customer-actions">
-                        <span class="status-badge status-${customer.status}">
-                            ${getStatusText(customer.status)}
-                        </span>
-                        <select onchange="updateStatus(${customer.id}, this.value)" style="padding: 6px 10px; border-radius: 15px; border: 2px solid #ddd;">
-                            <option value="waiting" ${customer.status === 'waiting' ? 'selected' : ''}>รอติดตาม</option>
-                            <option value="followup" ${customer.status === 'followup' ? 'selected' : ''}>ติดตามซ้ำ</option>
-                            <option value="completed" ${customer.status === 'completed' ? 'selected' : ''}>เสร็จแล้ว</option>
-                        </select>
-                        <button class="btn btn-small btn-edit" onclick="editCustomer(${customer.id})">แก้ไข</button>
-                        <button class="btn btn-small btn-delete" onclick="deleteCustomer(${customer.id})">ลบ</button>
-                    </div>
-                </div>
-            `).join('');
+            // Switch to login tab after 2 seconds
+            setTimeout(() => {
+                showLoginTab();
+                document.getElementById('registerSuccess').textContent = '';
+            }, 2000);
         }
 
-        // แปลงสถานะเป็นข้อความ
-        function getStatusText(status) {
-            const statusMap = {
-                'waiting': 'รอติดตาม',
-                'followup': 'ติดตามซ้ำ',
-                'completed': 'เสร็จแล้ว'
-            };
-            return statusMap[status] || status;
+        // Validation functions
+        function validateUsername() {
+            const username = document.getElementById('regUsername').value.trim();
+            const errorDiv = document.getElementById('usernameError');
+            
+            if (username.length < 3) {
+                errorDiv.textContent = 'ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร';
+                return false;
+            }
+            
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                errorDiv.textContent = 'ชื่อผู้ใช้ใช้ได้เฉพาะ a-z, A-Z, 0-9 และ _';
+                return false;
+            }
+            
+            errorDiv.textContent = '';
+            return true;
         }
 
-        // อัพเดทสถานะ
-        function updateStatus(id, newStatus) {
-            if (!currentUser) {
-                alert('กรุณาเข้าสู่ระบบก่อน');
+        function validateEmail() {
+            const email = document.getElementById('regEmail').value.trim();
+            const errorDiv = document.getElementById('emailError');
+            
+            if (!isValidEmail(email)) {
+                errorDiv.textContent = 'รูปแบบอีเมลไม่ถูกต้อง';
+                return false;
+            }
+            
+            errorDiv.textContent = '';
+            return true;
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('regPassword').value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthDiv.textContent = '';
                 return;
             }
             
-            const customer = customers.find(c => c.id === id);
-            if (customer) {
-                customer.status = newStatus;
-                customer.updatedBy = currentUser.displayName;
-                customer.updatedAt = new Date().toLocaleString('th-TH');
-                renderCustomers();
-                updateStats();
-            }
-        }
-
-        // แก้ไขลูกค้า
-        function editCustomer(id) {
-            if (!currentUser) {
-                alert('กรุณาเข้าสู่ระบบก่อน');
-                return;
-            }
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
             
-            const customer = customers.find(c => c.id === id);
-            if (customer) {
-                document.getElementById('customerName').value = customer.name;
-                document.getElementById('customerPhone').value = customer.phone || '';
-                document.getElementById('customerEmail').value = customer.email || '';
-                document.getElementById('contactReason').value = customer.reason;
-                document.getElementById('customerDetails').value = customer.details || '';
-                
-                editingId = id;
-                document.querySelector('.btn[type="submit"]').textContent = 'บันทึกการแก้ไข';
-                
-                // เลื่อนไปที่ฟอร์ม
-                document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        // ลบลูกค้า
-        function deleteCustomer(id) {
-            if (!currentUser) {
-                alert('กรุณาเข้าสู่ระบบก่อน');
-                return;
-            }
-            
-            if (confirm('คุณแน่ใจหรือไม่ที่จะลบข้อมูลลูกค้านี้?')) {
-                customers = customers.filter(c => c.id !== id);
-                updateUserFilter();
-                renderCustomers();
-                updateStats();
-            }
-        }
-
-        // อัพเดทสถิติ
-        function updateStats() {
-            const total = customers.length;
-            const completed = customers.filter(c => c.status === 'completed').length;
-            const waiting = customers.filter(c => c.status === 'waiting').length;
-            const followup = customers.filter(c => c.status === 'followup').length;
-
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('completedCount').textContent = completed;
-            document.getElementById('waitingCount').textContent = waiting;
-            document.getElementById('followupCount').textContent = followup;
-        }
-    </script>
-</body>
-</html>
+            if (strength < 3) {
+                strengthDiv.textContent = 'รหัสผ่านอ่อน
