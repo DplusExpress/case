@@ -477,7 +477,7 @@
                             <input type="tel" id="customerPhone">
                         </div>
                         <div class="form-group">
-                            <label for="customerEmail">อีเมล</label>
+                            <label for="customerEmail">User</label>
                             <input type="email" id="customerEmail">
                         </div>
                         <div class="form-group">
@@ -695,7 +695,7 @@
                     <div class="customer-details">
                         <strong>เรื่องที่ติดต่อ:</strong> ${customer.reason}<br>
                         ${customer.phone ? `<strong>เบอร์โทร:</strong> ${customer.phone}<br>` : ''}
-                        ${customer.email ? `<strong>อีเมล:</strong> ${customer.email}<br>` : ''}
+                        ${customer.email ? `<strong>User:</strong> ${customer.email}<br>` : ''}
                         ${customer.details ? `<strong>รายละเอียด:</strong> ${customer.details}` : ''}
                     </div>
                     <div class="customer-meta">
